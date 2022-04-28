@@ -7,21 +7,15 @@ tags: [azure,sentinel,siem]     # TAG names should always be lowercase
 
 # Sentinel SIEM
 
-## Table of contents
-1. [Create Azure Subscription](#subscription)
-2. [Create a VM in Azure](#VM)
-3. [Create a log repository (Log Analytics Workspace)](#workspace)
-4. [Set up Azure Sentinel (SIEM)](#sentinel)
-
 ## Creating Azure Subscription <a name="subscription"></a>
 
 We need to visit [Azure web site](https://azure.microsoft.com/en-us/free/). There,  you should click in "Start Free" and continue with the steps.
 
-![Azure Homepage](../assets/img/media/azure-homepage.png "Azure homepage"){: width="700" height="400" }
+![Azure Homepage](/assets/img/media/azure-homepage.png "Azure homepage"){: width="700" height="400" }
 
 Now, we can sign in portal.azure.com.
 
-![Azure portal](../assets/img/media/azure-portal.png "Azure portal"){: width="700" height="400" }
+![Azure portal](/assets/img/media/azure-portal.png "Azure portal"){: width="700" height="400" }
 
 ## Creating VM in Azure <a name="VM"></a>
 
@@ -40,16 +34,15 @@ This server will serve as a vulnerable machine. Therefore, In the networking sec
 
 **NOTE**: You shouldn't do this in a real enrivonment.
 
-![Inbound rule](../assets/img/media/inbound-rule.png "Inbound rule"){: width="700" height="400" }
+![Inbound rule](/assets/img/media/inbound-rule.png "Inbound rule"){: width="700" height="400" }
 
 Finally, click in "review+create"
 
-![creating vm](../assets/img/media/vm-creating.png "creating vm"){: width="700" height="400" }
+![creating vm](/assets/img/media/vm-creating.png "creating vm"){: width="700" height="400" }
 
 when the VM is deployed, we should test our RDP. To do that, we can run "mstsc" and test our connection.
 
-
-![rdp vm](../assets/img/media/rdp-connection.png "rdp vm"){: width="700" height="400" }
+![rdp vm](/assets/img/media/rdp-connection.png "rdp vm"){: width="700" height="400" }
 
 ## Creating a log analytics workspace <a name="workspace"></a>
 
@@ -65,7 +58,7 @@ for this example, we select those parameters:
 * name: LAW-Sentinel
 * region: Central US
 
-![workspace](../assets/img/media/create-law.png "workspace"){: width="700" height="400" }
+![workspace](/assets/img/media/create-law.png "workspace"){: width="700" height="400" }
 
 Finally, Sentinel will connect to this workspace in order to display the data
 
@@ -73,15 +66,15 @@ Finally, Sentinel will connect to this workspace in order to display the data
 
 Now, it's time to enable gather logs from VM into log analytics workspace. So, you need to search it and go to *environment settings* &rarr; select the subscription &rarr; auto provisioning &rarr; Log Analytics agent for Azure VMs to on &rarr; connect Azure VMs to a differente workspace: LAW-Sentinel
 
-![settings](../assets/img/media/settings.png "settings"){: width="700" height="400" }
+![settings](/assets/img/media/settings.png "settings"){: width="700" height="400" }
 
-![enable-law-auto](../assets/img/media/enable-law-auto.png "enable-law-auto"){: width="700" height="400" }
+![enable-law-auto](/assets/img/media/enable-law-auto.png "enable-law-auto"){: width="700" height="400" }
 
 Afterward, we should back to the log analytics workspace to connect the VM
 
-![law-vm](../assets/img/media/law-vm.png "law-vm"){: width="700" height="400" }
+![law-vm](/assets/img/media/law-vm.png "law-vm"){: width="700" height="400" }
 
-![law-vm-connect](../assets/img/media/law-vm-connect.png "law-vm-connect"){: width="700" height="400" }
+![law-vm-connect](/assets/img/media/law-vm-connect.png "law-vm-connect"){: width="700" height="400" }
 
 **Note**: the VM must be running to connect with the log analytics workspace 
 
@@ -89,7 +82,7 @@ Afterward, we should back to the log analytics workspace to connect the VM
 
 type *Microsoft Sentinel* in the search bar &rarr; create Microsoft Sentinel &rarr; select the workspace
 
-![sentinel](../assets/img/media/sentinel.png "sentinel"){: width="700" height="400" }
+![sentinel](/assets/img/media/sentinel.png "sentinel"){: width="700" height="400" }
 
 we have a 30-day trial:
 
@@ -102,7 +95,7 @@ During the trial, up to 10 GB/day are free for both Microsoft Sentinel and Log A
 first, we need to understand how an failed login attempt looks in the vm:
 
 
-![logon-failure](../assets/img/media/logon-failure.png "logon-failure"){: width="700" height="400" }
+![logon-failure](/assets/img/media/logon-failure.png "logon-failure"){: width="700" height="400" }
 
 * event ID: 4625
 * workstation name: name of source machine
