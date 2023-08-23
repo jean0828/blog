@@ -1,0 +1,301 @@
+<!DOCTYPE html><html lang="en" ><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><meta name="theme-color" media="(prefers-color-scheme: light)" content="#f7f7f7"><meta name="theme-color" media="(prefers-color-scheme: dark)" content="#1b1b1e"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="viewport" content="width=device-width, user-scalable=no initial-scale=1, shrink-to-fit=no, viewport-fit=cover" ><meta name="generator" content="Jekyll v4.3.2" /><meta property="og:title" content="Deploying a Cloud Environment for DevSecops" /><meta property="og:locale" content="en" /><meta name="description" content="For this case, we are going to use Google Cloud. There, a Kubernetes cluster will be created, Linux environment for development will be also created, and Jenkins will be deployed within Kubernetes." /><meta property="og:description" content="For this case, we are going to use Google Cloud. There, a Kubernetes cluster will be created, Linux environment for development will be also created, and Jenkins will be deployed within Kubernetes." /><link rel="canonical" href="https://jean0828.github.io/blog/posts/Deploying-a-Cloud-Environment-for-DevSecops/" /><meta property="og:url" content="https://jean0828.github.io/blog/posts/Deploying-a-Cloud-Environment-for-DevSecops/" /><meta property="og:site_name" content="Unf0rG1v3n" /><meta property="og:type" content="article" /><meta property="article:published_time" content="2023-02-28T03:20:00+00:00" /><meta name="twitter:card" content="summary" /><meta property="twitter:title" content="Deploying a Cloud Environment for DevSecops" /> <script type="application/ld+json"> {"@context":"https://schema.org","@type":"BlogPosting","dateModified":"2023-02-28T03:51:43+00:00","datePublished":"2023-02-28T03:20:00+00:00","description":"For this case, we are going to use Google Cloud. There, a Kubernetes cluster will be created, Linux environment for development will be also created, and Jenkins will be deployed within Kubernetes.","headline":"Deploying a Cloud Environment for DevSecops","mainEntityOfPage":{"@type":"WebPage","@id":"https://jean0828.github.io/blog/posts/Deploying-a-Cloud-Environment-for-DevSecops/"},"url":"https://jean0828.github.io/blog/posts/Deploying-a-Cloud-Environment-for-DevSecops/"}</script><title>Deploying a Cloud Environment for DevSecops | Unf0rG1v3n</title><link rel="apple-touch-icon" sizes="180x180" href="/blog/assets/img/favicons/apple-touch-icon.png"><link rel="icon" type="image/png" sizes="32x32" href="/blog/assets/img/favicons/favicon-32x32.png"><link rel="icon" type="image/png" sizes="16x16" href="/blog/assets/img/favicons/favicon-16x16.png"><link rel="manifest" href="/blog/assets/img/favicons/site.webmanifest"><link rel="shortcut icon" href="/blog/assets/img/favicons/favicon.ico"><meta name="apple-mobile-web-app-title" content="Unf0rG1v3n"><meta name="application-name" content="Unf0rG1v3n"><meta name="msapplication-TileColor" content="#da532c"><meta name="msapplication-config" content="/blog/assets/img/favicons/browserconfig.xml"><meta name="theme-color" content="#ffffff"><link rel="preconnect" href="https://fonts.googleapis.com" ><link rel="dns-prefetch" href="https://fonts.googleapis.com" ><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="dns-prefetch" href="https://fonts.gstatic.com" crossorigin><link rel="preconnect" href="https://fonts.googleapis.com" ><link rel="dns-prefetch" href="https://fonts.googleapis.com" ><link rel="preconnect" href="https://cdn.jsdelivr.net" ><link rel="dns-prefetch" href="https://cdn.jsdelivr.net" ><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lato&family=Source+Sans+Pro:wght@400;600;700;900&display=swap"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4/dist/css/bootstrap.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.11.2/css/all.min.css"><link rel="stylesheet" href="/blog/assets/css/style.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tocbot@4.20.1/dist/tocbot.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/magnific-popup@1/dist/magnific-popup.min.css"> <script src="https://cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script> <script type="text/javascript"> class ModeToggle { static get MODE_KEY() { return "mode"; } static get MODE_ATTR() { return "data-mode"; } static get DARK_MODE() { return "dark"; } static get LIGHT_MODE() { return "light"; } static get ID() { return "mode-toggle"; } constructor() { if (this.hasMode) { if (this.isDarkMode) { if (!this.isSysDarkPrefer) { this.setDark(); } } else { if (this.isSysDarkPrefer) { this.setLight(); } } } let self = this; /* always follow the system prefers */ this.sysDarkPrefers.addEventListener('change', () => { if (self.hasMode) { if (self.isDarkMode) { if (!self.isSysDarkPrefer) { self.setDark(); } } else { if (self.isSysDarkPrefer) { self.setLight(); } } self.clearMode(); } self.notify(); }); } /* constructor() */ get sysDarkPrefers() { return window.matchMedia("(prefers-color-scheme: dark)"); } get isSysDarkPrefer() { return this.sysDarkPrefers.matches; } get isDarkMode() { return this.mode === ModeToggle.DARK_MODE; } get isLightMode() { return this.mode === ModeToggle.LIGHT_MODE; } get hasMode() { return this.mode != null; } get mode() { return sessionStorage.getItem(ModeToggle.MODE_KEY); } /* get the current mode on screen */ get modeStatus() { if (this.isDarkMode || (!this.hasMode && this.isSysDarkPrefer)) { return ModeToggle.DARK_MODE; } else { return ModeToggle.LIGHT_MODE; } } setDark() { $('html').attr(ModeToggle.MODE_ATTR, ModeToggle.DARK_MODE); sessionStorage.setItem(ModeToggle.MODE_KEY, ModeToggle.DARK_MODE); } setLight() { $('html').attr(ModeToggle.MODE_ATTR, ModeToggle.LIGHT_MODE); sessionStorage.setItem(ModeToggle.MODE_KEY, ModeToggle.LIGHT_MODE); } clearMode() { $('html').removeAttr(ModeToggle.MODE_ATTR); sessionStorage.removeItem(ModeToggle.MODE_KEY); } /* Notify another plugins that the theme mode has changed */ notify() { window.postMessage({ direction: ModeToggle.ID, message: this.modeStatus }, "*"); } flipMode() { if (this.hasMode) { if (this.isSysDarkPrefer) { if (this.isLightMode) { this.clearMode(); } else { this.setLight(); } } else { if (this.isDarkMode) { this.clearMode(); } else { this.setDark(); } } } else { if (this.isSysDarkPrefer) { this.setLight(); } else { this.setDark(); } } this.notify(); } /* flipMode() */ } /* ModeToggle */ const modeToggle = new ModeToggle(); </script><body data-topbar-visible="true"><div id="sidebar" class="d-flex flex-column align-items-end"><div class="profile-wrapper text-center"><div id="avatar"> <a href="/blog/" class="mx-auto"> </a></div><div class="site-title"> <a href="/blog/">Unf0rG1v3n</a></div><div class="site-subtitle font-italic">Security engineer</div></div><ul class="w-100"><li class="nav-item"> <a href="/blog/" class="nav-link"> <i class="fa-fw fas fa-home ml-xl-3 mr-xl-3 unloaded"></i> <span>HOME</span> </a><li class="nav-item"> <a href="/blog/categories/" class="nav-link"> <i class="fa-fw fas fa-stream ml-xl-3 mr-xl-3 unloaded"></i> <span>CATEGORIES</span> </a><li class="nav-item"> <a href="/blog/tags/" class="nav-link"> <i class="fa-fw fas fa-tag ml-xl-3 mr-xl-3 unloaded"></i> <span>TAGS</span> </a><li class="nav-item"> <a href="/blog/archives/" class="nav-link"> <i class="fa-fw fas fa-archive ml-xl-3 mr-xl-3 unloaded"></i> <span>ARCHIVES</span> </a><li class="nav-item"> <a href="/blog/about/" class="nav-link"> <i class="fa-fw fas fa-info-circle ml-xl-3 mr-xl-3 unloaded"></i> <span>ABOUT</span> </a></ul><div class="sidebar-bottom mt-auto d-flex flex-wrap justify-content-center align-items-center"> <button class="mode-toggle btn" aria-label="Switch Mode"> <i class="fas fa-adjust"></i> </button> <span class="icon-border"></span> <a href="https://github.com/jean0828" aria-label="github" target="_blank" rel="noopener noreferrer"> <i class="fab fa-github"></i> </a> <a href="https://twitter.com/" aria-label="twitter" target="_blank" rel="noopener noreferrer"> <i class="fab fa-twitter"></i> </a> <a href="javascript:location.href = 'mailto:' + ['jean.santamaria93','gmail.com'].join('@')" aria-label="email" > <i class="fas fa-envelope"></i> </a> <a href="/blog/feed.xml" aria-label="rss" > <i class="fas fa-rss"></i> </a></div></div><div id="topbar-wrapper"><div id="topbar" class="container d-flex align-items-center justify-content-between h-100 pl-3 pr-3 pl-md-4 pr-md-4"> <span id="breadcrumb"> <span> <a href="/blog/"> Home </a> </span> <span>Deploying a Cloud Environment for DevSecops</span> </span> <i id="sidebar-trigger" class="fas fa-bars fa-fw"></i><div id="topbar-title"> Post</div><i id="search-trigger" class="fas fa-search fa-fw"></i> <span id="search-wrapper" class="align-items-center"> <i class="fas fa-search fa-fw"></i> <input class="form-control" id="search-input" type="search" aria-label="search" autocomplete="off" placeholder="Search..."> </span> <span id="search-cancel" >Cancel</span></div></div><div id="main-wrapper" class="d-flex justify-content-center"><div id="main" class="container pl-xl-4 pr-xl-4"><div class="row"><div id="core-wrapper" class="col-12 col-lg-11 col-xl-9 pr-xl-4"><div class="post pl-1 pr-1 pl-md-2 pr-md-2"><h1 data-toc-skip>Deploying a Cloud Environment for DevSecops</h1><div class="post-meta text-muted"> <span> Posted <em class="" data-ts="1677554400" data-df="ll" data-toggle="tooltip" data-placement="bottom"> Feb 28, 2023 </em> </span> <span> Updated <em class="" data-ts="1677556303" data-df="ll" data-toggle="tooltip" data-placement="bottom"> Feb 27, 2023 </em> </span><div class="d-flex justify-content-between"> <span> By <em> <a href="https://github.com/jean0828">Jean Pierre</a> </em> </span><div> <span class="readtime" data-toggle="tooltip" data-placement="bottom" title="1096 words"> <em>6 min</em> read</span></div></div></div><div class="post-content"><p>For this case, we are going to use Google Cloud. There, a Kubernetes cluster will be created, Linux environment for development will be also created, and Jenkins will be deployed within Kubernetes.</p><p>This is part from the course of Linux Foundation called Implementing DevSecOps and it’s given by <a href="https://gist.github.com/initcron">initcron</a>.</p><h2 id="create-a-kubernetes-cluster-with-gke"><span class="mr-2">Create a Kubernetes Cluster with GKE</span><a href="#create-a-kubernetes-cluster-with-gke" class="anchor text-muted"><i class="fas fa-hashtag"></i></a></h2><p>First, it’s recommended to create a new project where the environment will be deployed. To do that, we just have to click in <em>New Project</em>.</p><p><a href="https://i.imgur.com/Q7GabDC.png" class="popup img-link "><img data-src="https://i.imgur.com/Q7GabDC.png" alt="new project" class="lazyload" data-proofer-ignore></a></p><p>For this case, the name is <strong>DevSecOps</strong>.</p><p><a href="https://i.imgur.com/D5roQI2.png" class="popup img-link "><img data-src="https://i.imgur.com/D5roQI2.png" alt="project" class="lazyload" data-proofer-ignore></a></p><p>After creating the project, we should enable the Kubernetes Engine API. To enable it, we have to go to navegation menu → Kubernetes Engine → Clusters → Enable</p><p><a href="https://i.imgur.com/k3JCe4J.png" class="popup img-link "><img data-src="https://i.imgur.com/k3JCe4J.png" alt="Kubernetes-api" class="lazyload" data-proofer-ignore></a></p><p><a href="https://i.imgur.com/KdHQFdi.png" class="popup img-link "><img data-src="https://i.imgur.com/KdHQFdi.png" alt="enable-kuber" class="lazyload" data-proofer-ignore></a></p><p>we have to wait some minutes to have Kubernetes Engine Api activated.</p><p>When the Kubernetes, we can create the cluster with the following options.</p><p><a href="https://i.imgur.com/kcnI4a4.png" class="popup img-link "><img data-src="https://i.imgur.com/kcnI4a4.png" alt="create-cluster" class="lazyload" data-proofer-ignore></a></p><ul><li>Cluster mode: Standard<li>Release Channel: Rapid Channel<li>Version: select the newest</ul><p>As a result, we’ll have a Kubernetes cluster with 3 nodes.</p><p><a href="https://i.imgur.com/lrL0U1H.png" class="popup img-link "><img data-src="https://i.imgur.com/lrL0U1H.png" alt="cluster" class="lazyload" data-proofer-ignore></a></p><p>Next, it’s recommended to create a firewall rule to allow connections from your public IP. to crteate the rule, we can do it from Navigation Menu → VPC Network → Firewall.</p><p><a href="https://i.imgur.com/FRZGNq9.png" class="popup img-link "><img data-src="https://i.imgur.com/FRZGNq9.png" alt="firewall" class="lazyload" data-proofer-ignore></a></p><p>Then, we have to select the one which has the following naming convention: <strong>gke-cluster-X-XXXXX-all</strong> and add your IP.</p><p><a href="https://i.imgur.com/X38KHzn.png" class="popup img-link "><img data-src="https://i.imgur.com/X38KHzn.png" alt="fw-rule" class="lazyload" data-proofer-ignore></a></p><p><a href="https://i.imgur.com/scmR78N.png" class="popup img-link "><img data-src="https://i.imgur.com/scmR78N.png" alt="rule" class="lazyload" data-proofer-ignore></a></p><p>Now it’s time to connecto to our cluster and the easiest way to do it, it’s using the cloud shell and execute the command suggested.</p><p><a href="https://i.imgur.com/GaJOEIn.png" class="popup img-link "><img data-src="https://i.imgur.com/GaJOEIn.png" alt="cloud-shell" class="lazyload" data-proofer-ignore></a></p><p>in this environment, this is the command:</p><div class="language-plaintext highlighter-rouge"><div class="code-header"> <span data-label-text="Plaintext"><i class="fas fa-code small"></i></span> <button aria-label="copy" data-title-succeed="Copied!"><i class="far fa-clipboard"></i></button></div><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+</pre><td class="rouge-code"><pre>gcloud container clusters get-credentials cluster-1 --zone us-central1-c --project devsecops-378701
+</pre></table></code></div></div><p>After that, we can check the status of the cluster:</p><div class="language-plaintext highlighter-rouge"><div class="code-header"> <span data-label-text="Plaintext"><i class="fas fa-code small"></i></span> <button aria-label="copy" data-title-succeed="Copied!"><i class="far fa-clipboard"></i></button></div><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+</pre><td class="rouge-code"><pre>kubectl get nodes
+kubectl config get-contexts
+kubectl get pods --all-namespaces
+</pre></table></code></div></div><p><a href="https://i.imgur.com/qS0OJD2.png" class="popup img-link "><img data-src="https://i.imgur.com/qS0OJD2.png" alt="output" class="lazyload" data-proofer-ignore></a></p><p>Finally, check that we also have helm installed with the command <em>helm version</em>.</p><h2 id="creating-a-linux-development-environment"><span class="mr-2">Creating a Linux Development Environment</span><a href="#creating-a-linux-development-environment" class="anchor text-muted"><i class="fas fa-hashtag"></i></a></h2><p>The Linux VM is where our development environment will be. Here, we can test our apps with dockers before to put it in the deployment environment.</p><p>To create the Linux VM, we have to go to VM Instances and click in <em>create instance</em> wih those options:</p><ul><li>Size Disk: 30 GB<li>Operating System: Ubuntu LTS<li>Create or Import SSH Keys<li>network tag: dev<li>Startup Script: include this script:</ul><div class="language-plaintext highlighter-rouge"><div class="code-header"> <span data-label-text="Plaintext"><i class="fas fa-code small"></i></span> <button aria-label="copy" data-title-succeed="Copied!"><i class="far fa-clipboard"></i></button></div><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+</pre><td class="rouge-code"><pre>#!/bin/bash
+
+apt-get update
+apt-get install -y git wget
+
+# Install Docker
+apt-get install \
+    apt-transport-https \
+    ca-certificates \
+    curl \
+    software-properties-common
+
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+apt-key fingerprint 0EBFCD88
+add-apt-repository \
+   "deb [arch=amd64] https://download.docker.com/linux/ubuntu \
+   $(lsb_release -cs) \
+   stable"
+
+apt-get update
+
+apt-get install -yq docker-ce
+
+cd /root
+git clone https://github.com/codespaces-io/codespaces.git
+curl -L "https://github.com/docker/compose/releases/download/1.29.1/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+chmod +x /usr/local/bin/docker-compose
+</pre></table></code></div></div><p><strong>NOTE</strong>: Credits of the script and content of the course to <a href="https://gist.github.com/initcron">initcron</a></p><p>Later, we have to create a FW rule to allow ssh connections from our IP.</p><p><a href="https://i.imgur.com/ElvBNgk.png" class="popup img-link "><img data-src="https://i.imgur.com/ElvBNgk.png" alt="disk" class="lazyload" data-proofer-ignore></a></p><p><a href="https://i.imgur.com/pPrbC6J.png" class="popup img-link "><img data-src="https://i.imgur.com/pPrbC6J.png" alt="tag" class="lazyload" data-proofer-ignore></a></p><p><a href="https://i.imgur.com/CwQLrb9.png" class="popup img-link "><img data-src="https://i.imgur.com/CwQLrb9.png" alt="ssh" class="lazyload" data-proofer-ignore></a></p><p><a href="https://i.imgur.com/TYv0Yhf.png" class="popup img-link "><img data-src="https://i.imgur.com/TYv0Yhf.png" alt="script" class="lazyload" data-proofer-ignore></a></p><p><a href="https://i.imgur.com/rkQHiNY.png" class="popup img-link "><img data-src="https://i.imgur.com/rkQHiNY.png" alt="ruledev" class="lazyload" data-proofer-ignore></a></p><p>Finally, to connect to the vm, we just use ssh and check docker is installed:</p><div class="language-plaintext highlighter-rouge"><div class="code-header"> <span data-label-text="Plaintext"><i class="fas fa-code small"></i></span> <button aria-label="copy" data-title-succeed="Copied!"><i class="far fa-clipboard"></i></button></div><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+</pre><td class="rouge-code"><pre>ssh user@ip
+</pre></table></code></div></div><p><a href="https://i.imgur.com/aroP7P1.png" class="popup img-link "><img data-src="https://i.imgur.com/aroP7P1.png" alt="ssh" class="lazyload" data-proofer-ignore></a></p><p><a href="https://i.imgur.com/YE7B9Bl.png" class="popup img-link "><img data-src="https://i.imgur.com/YE7B9Bl.png" alt="inst" class="lazyload" data-proofer-ignore></a></p><p>With that, we can confirm that our dev environment was successfully deployed.</p><h2 id="installing-jenkins"><span class="mr-2">Installing Jenkins</span><a href="#installing-jenkins" class="anchor text-muted"><i class="fas fa-hashtag"></i></a></h2><p>The objective of installing Jenkins is to use continuous integration. In this case, we’re going to use Helm. Remember that Helm is the package manager of Kubernetes.</p><p>To install Jenkins, we should follow those steps:</p><ol><li>add Jenkins repository<div class="language-plaintext highlighter-rouge"><div class="code-header"> <span data-label-text="Plaintext"><i class="fas fa-code small"></i></span> <button aria-label="copy" data-title-succeed="Copied!"><i class="far fa-clipboard"></i></button></div><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+</pre><td class="rouge-code"><pre>helm repo add Jenkins [https://charts.Jenkins.io](https://charts.Jenkins.io)
+helm repo update
+</pre></table></code></div></div><li>Create a namespace for CI<div class="language-plaintext highlighter-rouge"><div class="code-header"> <span data-label-text="Plaintext"><i class="fas fa-code small"></i></span> <button aria-label="copy" data-title-succeed="Copied!"><i class="far fa-clipboard"></i></button></div><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+</pre><td class="rouge-code"><pre>kubectl create namespace ci
+</pre></table></code></div></div><li>Create <em>Jenkins.values.yaml</em> file:<div class="language-plaintext highlighter-rouge"><div class="code-header"> <span data-label-text="Plaintext"><i class="fas fa-code small"></i></span> <button aria-label="copy" data-title-succeed="Copied!"><i class="far fa-clipboard"></i></button></div><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+</pre><td class="rouge-code"><pre>controller:
+ serviceType: NodePort
+ resources:
+  requests:
+cpu: "400m"
+memory: "512Mi"
+  limits:
+ cpu: "2000m"
+</pre></table></code></div></div><li>Install Jenkins<div class="language-plaintext highlighter-rouge"><div class="code-header"> <span data-label-text="Plaintext"><i class="fas fa-code small"></i></span> <button aria-label="copy" data-title-succeed="Copied!"><i class="far fa-clipboard"></i></button></div><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+</pre><td class="rouge-code"><pre>helm install -n ci --values Jenkins.values.yaml Jenkins Jenkins/Jenkins
+</pre></table></code></div></div></ol><p><a href="https://i.imgur.com/RRMIMRC.png" class="popup img-link "><img data-src="https://i.imgur.com/RRMIMRC.png" alt="Jenkins" class="lazyload" data-proofer-ignore></a></p><p>When the installation is donde, we have to follow the steps of the output to get the admin password and then login.</p><div class="language-plaintext highlighter-rouge"><div class="code-header"> <span data-label-text="Plaintext"><i class="fas fa-code small"></i></span> <button aria-label="copy" data-title-succeed="Copied!"><i class="far fa-clipboard"></i></button></div><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+</pre><td class="rouge-code"><pre>kubectl exec --namespace ci -it svc/Jenkins -c Jenkins -- /bin/cat /run/secrets/additional/chart-admin-password &amp;&amp; echo
+[output]t3P4I48zb90j7Dbr3aBC8J
+export NODE_PORT=$(kubectl get --namespace ci -o jsonpath="{.spec.ports[0].nodePort}" services Jenkins)
+export NODE_IP=$(kubectl get nodes --namespace ci -o jsonpath="{.items[0].status.addresses[0].address}")
+echo http://$NODE_IP:$NODE_PORT
+[output]http://10.128.0.6:31893
+</pre></table></code></div></div><p>according to the previous output, we have to access this webpage http://10.128.0.6:319893. However, it’s an internal IP and we have to find the external IP adress. To find the external IP, we have to execute this command:</p><div class="language-plaintext highlighter-rouge"><div class="code-header"> <span data-label-text="Plaintext"><i class="fas fa-code small"></i></span> <button aria-label="copy" data-title-succeed="Copied!"><i class="far fa-clipboard"></i></button></div><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+</pre><td class="rouge-code"><pre>kubectl get nodes -o wide
+</pre></table></code></div></div><p><a href="https://i.imgur.com/aq9Ivxt.png" class="popup img-link "><img data-src="https://i.imgur.com/aq9Ivxt.png" alt="access" class="lazyload" data-proofer-ignore></a></p><p>In this case, the url is: http://35.223.160.114:31893/</p><p><a href="https://i.imgur.com/S3Y4oAg.png" class="popup img-link "><img data-src="https://i.imgur.com/S3Y4oAg.png" alt="webaccess" class="lazyload" data-proofer-ignore></a></p><p>Now, it’s time to configure Jenkins:</p><ol><li>change admin password.<li>Go to Manage Jenkins → Plugin Manager → available plugins and install:<ol><li>Blue Ocean<li>Configuration as Code</ol><li>Download now and install after restart</ol><p><a href="https://i.imgur.com/qb9hJjB.png" class="popup img-link "><img data-src="https://i.imgur.com/qb9hJjB.png" alt="plugins" class="lazyload" data-proofer-ignore></a></p><p><a href="https://i.imgur.com/Vx19Qu4.png" class="popup img-link "><img data-src="https://i.imgur.com/Vx19Qu4.png" alt="installpl" class="lazyload" data-proofer-ignore></a></p><h2 id="setting-a-simple-continuous-integration-devops-pipeline"><span class="mr-2">Setting a simple continuous Integration DevOps pipeline</span><a href="#setting-a-simple-continuous-integration-devops-pipeline" class="anchor text-muted"><i class="fas fa-hashtag"></i></a></h2><p>Fort his case, we’re going to fork this java repo: https://github.com/lfs262/dso-demo. In this repo, we can see the Jenkins file and see how the pipeline will be:</p><div class="language-plaintext highlighter-rouge"><div class="code-header"> <span data-label-text="Plaintext"><i class="fas fa-code small"></i></span> <button aria-label="copy" data-title-succeed="Copied!"><i class="far fa-clipboard"></i></button></div><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+61
+62
+63
+64
+65
+66
+67
+68
+69
+70
+71
+72
+73
+74
+75
+76
+77
+78
+79
+80
+81
+82
+83
+84
+85
+86
+87
+88
+89
+90
+91
+92
+93
+94
+95
+96
+97
+98
+99
+</pre><td class="rouge-code"><pre>pipeline {
+
+agent {
+
+Kubernetes {
+
+yamlFile 'build-agent.yaml'
+
+defaultContainer 'maven'
+
+idleMinutes 1
+
+}
+
+}
+
+stages {
+
+stage('Build') {
+
+parallel {
+
+stage('Compile') {
+
+steps {
+
+container('maven') {
+
+sh 'mvn compile'
+
+}
+
+}
+
+}
+
+}
+
+}
+
+stage('Test') {
+
+parallel {
+
+stage('Unit Tests') {
+
+steps {
+
+container('maven') {
+
+sh 'mvn test'
+
+}
+
+}
+
+}
+
+}
+
+}
+
+stage('Package') {
+
+parallel {
+
+stage('Create Jarfile') {
+
+steps {
+
+container('maven') {
+
+sh 'mvn package -DskipTests'
+
+}
+
+}
+
+}
+
+}
+
+}
+
+stage('Deploy to Dev') {
+
+steps {
+
+// TODO
+
+sh "echo done"
+
+}
+
+}
+
+}
+
+}
+</pre></table></code></div></div><p>After forking the repo, in Jenkins we have to go to Blue Ocean. Blue Ocean is the UI created to run pipelines.</p><p><a href="https://i.imgur.com/SB1hL54.png" class="popup img-link "><img data-src="https://i.imgur.com/SB1hL54.png" alt="blueo" class="lazyload" data-proofer-ignore></a></p><p>From there, create a new pipeline, link with github account and follow the steps for Jenkins can pull the code, the Jenkins file, create the pipeline, and push status updates to the Git repository on the commit history.</p><p><a href="https://i.imgur.com/e7rPcSb.png" class="popup img-link "><img data-src="https://i.imgur.com/e7rPcSb.png" alt="oceanb2" class="lazyload" data-proofer-ignore></a></p><p><a href="https://i.imgur.com/P6czXcu.png" class="popup img-link "><img data-src="https://i.imgur.com/P6czXcu.png" alt="github" class="lazyload" data-proofer-ignore></a></p><p>Then, Copy the token and paste in Jenkins</p><p><a href="https://i.imgur.com/JRj5BGe.png" class="popup img-link "><img data-src="https://i.imgur.com/JRj5BGe.png" alt="token" class="lazyload" data-proofer-ignore></a></p><p><a href="https://i.imgur.com/5hP8zZm.png" class="popup img-link "><img data-src="https://i.imgur.com/5hP8zZm.png" alt="tokenpaste" class="lazyload" data-proofer-ignore></a></p><p>After, create pipeline. This action will read the repository, find the Jenkins file, create the pipeline, and launch it.</p><p><a href="https://i.imgur.com/xY7DeO2.png" class="popup img-link "><img data-src="https://i.imgur.com/xY7DeO2.png" alt="pipeline" class="lazyload" data-proofer-ignore></a></p><p>Also, you can confirm that our Jenkins jobs will be launched as a Kubernetes pods.</p><p><a href="https://i.imgur.com/mVp3bGr.png" class="popup img-link "><img data-src="https://i.imgur.com/mVp3bGr.png" alt="pods" class="lazyload" data-proofer-ignore></a></p><p>if you have some error during the CI, it’s because you need to update blue ocean and github plugins.</p><p><a href="https://i.imgur.com/zTpz1P5.png" class="popup img-link "><img data-src="https://i.imgur.com/zTpz1P5.png" alt="success" class="lazyload" data-proofer-ignore></a></p><p>This is a simple Kubernetes native continuous integration pipeline.</p></div><div class="post-tail-wrapper text-muted"><div class="post-meta mb-3"> <i class="far fa-folder-open fa-fw mr-1"></i> <a href='/blog/categories/devsecops/'>devsecops</a></div><div class="post-tags"> <i class="fa fa-tags fa-fw mr-1"></i> <a href="/blog/tags/kubernetes/" class="post-tag no-text-decoration" >kubernetes</a> <a href="/blog/tags/google-cloud/" class="post-tag no-text-decoration" >google cloud</a> <a href="/blog/tags/devsecops/" class="post-tag no-text-decoration" >devsecops</a> <a href="/blog/tags/jenkins/" class="post-tag no-text-decoration" >jenkins</a></div><div class="post-tail-bottom d-flex justify-content-between align-items-center mt-3 pt-5 pb-2"><div class="license-wrapper"> This post is licensed under <a href="https://creativecommons.org/licenses/by/4.0/"> CC BY 4.0 </a> by the author.</div><div class="share-wrapper"> <span class="share-label text-muted mr-1">Share</span> <span class="share-icons"> <a href="https://twitter.com/intent/tweet?text=Deploying%20a%20Cloud%20Environment%20for%20DevSecops%20-%20Unf0rG1v3n&url=https%3A%2F%2Fjean0828.github.io%2Fblog%2Fposts%2FDeploying-a-Cloud-Environment-for-DevSecops%2F" data-toggle="tooltip" data-placement="top" title="Twitter" target="_blank" rel="noopener" aria-label="Twitter"> <i class="fa-fw fab fa-twitter"></i> </a> <a href="https://www.facebook.com/sharer/sharer.php?title=Deploying%20a%20Cloud%20Environment%20for%20DevSecops%20-%20Unf0rG1v3n&u=https%3A%2F%2Fjean0828.github.io%2Fblog%2Fposts%2FDeploying-a-Cloud-Environment-for-DevSecops%2F" data-toggle="tooltip" data-placement="top" title="Facebook" target="_blank" rel="noopener" aria-label="Facebook"> <i class="fa-fw fab fa-facebook-square"></i> </a> <a href="https://t.me/share/url?url=https%3A%2F%2Fjean0828.github.io%2Fblog%2Fposts%2FDeploying-a-Cloud-Environment-for-DevSecops%2F&text=Deploying%20a%20Cloud%20Environment%20for%20DevSecops%20-%20Unf0rG1v3n" data-toggle="tooltip" data-placement="top" title="Telegram" target="_blank" rel="noopener" aria-label="Telegram"> <i class="fa-fw fab fa-telegram"></i> </a> <i id="copy-link" class="fa-fw fas fa-link small" data-toggle="tooltip" data-placement="top" title="Copy link" data-title-succeed="Link copied successfully!"> </i> </span></div></div></div></div></div><div id="panel-wrapper" class="col-xl-3 pl-2 text-muted"><div class="access"><div id="access-lastmod" class="post"><div class="panel-heading">Recently Updated</div><ul class="post-content pl-0 pb-1 ml-1 mt-2"><li><a href="/blog/posts/LDAP-Monitoring-with-AMA-and-Microsoft-Sentinel/">LDAP Monitoring with AMA and Microsoft Sentinel</a><li><a href="/blog/posts/Deploying-a-Cloud-Environment-for-DevSecops/">Deploying a Cloud Environment for DevSecops</a><li><a href="/blog/posts/Analyzing-Packets-with-Wireshark-and-Python/">Analyzing Packets with Wireshark and Python</a><li><a href="/blog/posts/Administracion-de-cuentas-locales-en-el-Directorio-Activo-con-LAPS/">(ESP) Administracion de cuentas locales en el Directorio Activo con LAPS</a><li><a href="/blog/posts/Monitoring-Powershell-commands-with-Elastic-Stack/">Monitoring Powershell commands with Elastic Stack</a></ul></div><div id="access-tags"><div class="panel-heading">Trending Tags</div><div class="d-flex flex-wrap mt-3 mb-1 mr-3"> <a class="post-tag" href="/blog/tags/sentinel/">sentinel</a> <a class="post-tag" href="/blog/tags/siem/">siem</a> <a class="post-tag" href="/blog/tags/active-directory/">active directory</a> <a class="post-tag" href="/blog/tags/windows/">windows</a> <a class="post-tag" href="/blog/tags/azure/">azure</a> <a class="post-tag" href="/blog/tags/devsecops/">devsecops</a> <a class="post-tag" href="/blog/tags/elastic/">elastic</a> <a class="post-tag" href="/blog/tags/google-cloud/">google cloud</a> <a class="post-tag" href="/blog/tags/jenkins/">jenkins</a> <a class="post-tag" href="/blog/tags/kubernetes/">kubernetes</a></div></div></div><div id="toc-wrapper" class="pl-0 pr-4 mb-5"><div class="panel-heading pl-3 pt-2 mb-2">Contents</div><nav id="toc"></nav></div><script src="https://cdn.jsdelivr.net/npm/tocbot@4.20.1/dist/tocbot.min.js"></script></div></div><div class="row"><div id="tail-wrapper" class="col-12 col-lg-11 col-xl-9 pl-3 pr-3 pr-xl-4 mt-5"><div id="related-posts" class="mb-2 mb-sm-4"><h3 class="pt-2 mb-4 ml-1" data-toc-skip>Further Reading</h3><div class="card-deck mb-4"><div class="card"> <a href="/blog/posts/Adding-the-Docker-Build-and-Publish-Stage-in-a-Pipeline/"><div class="card-body"> <em class="small" data-ts="1680661200" data-df="ll" > Apr 5, 2023 </em><h3 class="pt-0 mt-1 mb-3" data-toc-skip>Adding the Docker Build and Publish Stage in a Pipeline</h3><div class="text-muted small"><p> This is part from the course of Linux Foundation called Implementing DevSecOps and it’s given by initcron. In a development environment, you can build an image with Docker. However, in a Continuou...</p></div></div></a></div><div class="card"> <a href="/blog/posts/LDAP-Monitoring-with-AMA-and-Microsoft-Sentinel/"><div class="card-body"> <em class="small" data-ts="1692795600" data-df="ll" > Aug 23, 2023 </em><h3 class="pt-0 mt-1 mb-3" data-toc-skip>LDAP Monitoring with AMA and Microsoft Sentinel</h3><div class="text-muted small"><p> According to Microsoft. LDAP is “an application protocol for working with various directory services. Directory services, such as Active Directory, store user and account information, and security ...</p></div></div></a></div><div class="card"> <a href="/blog/posts/Analyzing-Packets-with-Wireshark-and-Python/"><div class="card-body"> <em class="small" data-ts="1664076000" data-df="ll" > Sep 25, 2022 </em><h3 class="pt-0 mt-1 mb-3" data-toc-skip>Analyzing Packets with Wireshark and Python</h3><div class="text-muted small"><p> Some cases, as a analysts we need to review network packets to find the root cause of an error or incident. for this reason, in this post we’re going to analyze packets using wireshark and see if w...</p></div></div></a></div></div></div><div class="post-navigation d-flex justify-content-between"> <a href="/blog/posts/Analyzing-Packets-with-Wireshark-and-Python/" class="btn btn-outline-primary" prompt="Older"><p>Analyzing Packets with Wireshark and Python</p></a> <a href="/blog/posts/Adding-the-Docker-Build-and-Publish-Stage-in-a-Pipeline/" class="btn btn-outline-primary" prompt="Newer"><p>Adding the Docker Build and Publish Stage in a Pipeline</p></a></div></div></div></div><div id="search-result-wrapper" class="d-flex justify-content-center unloaded"><div class="col-12 col-sm-11 post-content"><div id="search-hints"><div id="access-tags"><div class="panel-heading">Trending Tags</div><div class="d-flex flex-wrap mt-3 mb-1 mr-3"> <a class="post-tag" href="/blog/tags/sentinel/">sentinel</a> <a class="post-tag" href="/blog/tags/siem/">siem</a> <a class="post-tag" href="/blog/tags/active-directory/">active directory</a> <a class="post-tag" href="/blog/tags/windows/">windows</a> <a class="post-tag" href="/blog/tags/azure/">azure</a> <a class="post-tag" href="/blog/tags/devsecops/">devsecops</a> <a class="post-tag" href="/blog/tags/elastic/">elastic</a> <a class="post-tag" href="/blog/tags/google-cloud/">google cloud</a> <a class="post-tag" href="/blog/tags/jenkins/">jenkins</a> <a class="post-tag" href="/blog/tags/kubernetes/">kubernetes</a></div></div></div><div id="search-results" class="d-flex flex-wrap justify-content-center text-muted mt-3"></div></div></div></div><footer><div class="container pl-lg-4 pr-lg-4"><div class="d-flex justify-content-between align-items-center text-muted ml-md-3 mr-md-3"><div class="footer-left"><p class="mb-0"> © 2023 <a href="https://github.com/jean0828">Jean Pierre</a>. <span data-toggle="tooltip" data-placement="top" title="Except where otherwise noted, the blog posts on this site are licensed under the Creative Commons Attribution 4.0 International (CC BY 4.0) License by the author.">Some rights reserved.</span></p></div><div class="footer-right"><p class="mb-0">Powered by <a href="https://jekyllrb.com" target="_blank" rel="noopener">Jekyll</a> with <a href="https://github.com/cotes2020/jekyll-theme-chirpy" target="_blank" rel="noopener">Chirpy</a> theme.</p></div></div></div></footer><div id="mask"></div><a id="back-to-top" href="#" aria-label="back-to-top" class="btn btn-lg btn-box-shadow" role="button"> <i class="fas fa-angle-up"></i> </a> <script src="https://cdn.jsdelivr.net/npm/simple-jekyll-search@1.10.0/dest/simple-jekyll-search.min.js"></script> <script> SimpleJekyllSearch({ searchInput: document.getElementById('search-input'), resultsContainer: document.getElementById('search-results'), json: '/blog/assets/js/data/search.json', searchResultTemplate: '<div class="pl-1 pr-1 pl-sm-2 pr-sm-2 pl-lg-4 pr-lg-4 pl-xl-0 pr-xl-0"> <a href="{url}">{title}</a><div class="post-meta d-flex flex-column flex-sm-row text-muted mt-1 mb-1"> {categories} {tags}</div><p>{snippet}</p></div>', noResultsText: '<p class="mt-5">Oops! No result founds.</p>', templateMiddleware: function(prop, value, template) { if (prop === 'categories') { if (value === '') { return `${value}`; } else { return `<div class="mr-sm-4"><i class="far fa-folder fa-fw"></i>${value}</div>`; } } if (prop === 'tags') { if (value === '') { return `${value}`; } else { return `<div><i class="fa fa-tag fa-fw"></i>${value}</div>`; } } } }); </script> <script src="https://cdn.jsdelivr.net/combine/npm/magnific-popup@1/dist/jquery.magnific-popup.min.js,npm/lazysizes@5.3.2/lazysizes.min.js,npm/clipboard@2/dist/clipboard.min.js"></script> <script src="https://cdn.jsdelivr.net/combine/npm/dayjs@1/dayjs.min.js,npm/dayjs@1/locale/en.min.js,npm/dayjs@1/plugin/relativeTime.min.js,npm/dayjs@1/plugin/localizedFormat.min.js"></script> <script defer src="/blog/assets/js/dist/post.min.js"></script> <script src="https://cdn.jsdelivr.net/npm/bootstrap@4/dist/js/bootstrap.bundle.min.js"></script> <script defer src="/blog/unregister.js"></script>

@@ -1,0 +1,375 @@
+<!DOCTYPE html><html lang="en" ><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><meta name="theme-color" media="(prefers-color-scheme: light)" content="#f7f7f7"><meta name="theme-color" media="(prefers-color-scheme: dark)" content="#1b1b1e"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="viewport" content="width=device-width, user-scalable=no initial-scale=1, shrink-to-fit=no, viewport-fit=cover" ><meta name="generator" content="Jekyll v4.3.2" /><meta property="og:title" content="Adding the Docker Build and Publish Stage in a Pipeline" /><meta property="og:locale" content="en" /><meta name="description" content="This is part from the course of Linux Foundation called Implementing DevSecOps and it’s given by initcron." /><meta property="og:description" content="This is part from the course of Linux Foundation called Implementing DevSecOps and it’s given by initcron." /><link rel="canonical" href="https://jean0828.github.io/blog/posts/Adding-the-Docker-Build-and-Publish-Stage-in-a-Pipeline/" /><meta property="og:url" content="https://jean0828.github.io/blog/posts/Adding-the-Docker-Build-and-Publish-Stage-in-a-Pipeline/" /><meta property="og:site_name" content="Unf0rG1v3n" /><meta property="og:type" content="article" /><meta property="article:published_time" content="2023-04-05T02:20:00+00:00" /><meta name="twitter:card" content="summary" /><meta property="twitter:title" content="Adding the Docker Build and Publish Stage in a Pipeline" /> <script type="application/ld+json"> {"@context":"https://schema.org","@type":"BlogPosting","dateModified":"2023-04-05T02:20:00+00:00","datePublished":"2023-04-05T02:20:00+00:00","description":"This is part from the course of Linux Foundation called Implementing DevSecOps and it’s given by initcron.","headline":"Adding the Docker Build and Publish Stage in a Pipeline","mainEntityOfPage":{"@type":"WebPage","@id":"https://jean0828.github.io/blog/posts/Adding-the-Docker-Build-and-Publish-Stage-in-a-Pipeline/"},"url":"https://jean0828.github.io/blog/posts/Adding-the-Docker-Build-and-Publish-Stage-in-a-Pipeline/"}</script><title>Adding the Docker Build and Publish Stage in a Pipeline | Unf0rG1v3n</title><link rel="apple-touch-icon" sizes="180x180" href="/blog/assets/img/favicons/apple-touch-icon.png"><link rel="icon" type="image/png" sizes="32x32" href="/blog/assets/img/favicons/favicon-32x32.png"><link rel="icon" type="image/png" sizes="16x16" href="/blog/assets/img/favicons/favicon-16x16.png"><link rel="manifest" href="/blog/assets/img/favicons/site.webmanifest"><link rel="shortcut icon" href="/blog/assets/img/favicons/favicon.ico"><meta name="apple-mobile-web-app-title" content="Unf0rG1v3n"><meta name="application-name" content="Unf0rG1v3n"><meta name="msapplication-TileColor" content="#da532c"><meta name="msapplication-config" content="/blog/assets/img/favicons/browserconfig.xml"><meta name="theme-color" content="#ffffff"><link rel="preconnect" href="https://fonts.googleapis.com" ><link rel="dns-prefetch" href="https://fonts.googleapis.com" ><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="dns-prefetch" href="https://fonts.gstatic.com" crossorigin><link rel="preconnect" href="https://fonts.googleapis.com" ><link rel="dns-prefetch" href="https://fonts.googleapis.com" ><link rel="preconnect" href="https://cdn.jsdelivr.net" ><link rel="dns-prefetch" href="https://cdn.jsdelivr.net" ><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lato&family=Source+Sans+Pro:wght@400;600;700;900&display=swap"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4/dist/css/bootstrap.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.11.2/css/all.min.css"><link rel="stylesheet" href="/blog/assets/css/style.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tocbot@4.20.1/dist/tocbot.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/magnific-popup@1/dist/magnific-popup.min.css"> <script src="https://cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script> <script type="text/javascript"> class ModeToggle { static get MODE_KEY() { return "mode"; } static get MODE_ATTR() { return "data-mode"; } static get DARK_MODE() { return "dark"; } static get LIGHT_MODE() { return "light"; } static get ID() { return "mode-toggle"; } constructor() { if (this.hasMode) { if (this.isDarkMode) { if (!this.isSysDarkPrefer) { this.setDark(); } } else { if (this.isSysDarkPrefer) { this.setLight(); } } } let self = this; /* always follow the system prefers */ this.sysDarkPrefers.addEventListener('change', () => { if (self.hasMode) { if (self.isDarkMode) { if (!self.isSysDarkPrefer) { self.setDark(); } } else { if (self.isSysDarkPrefer) { self.setLight(); } } self.clearMode(); } self.notify(); }); } /* constructor() */ get sysDarkPrefers() { return window.matchMedia("(prefers-color-scheme: dark)"); } get isSysDarkPrefer() { return this.sysDarkPrefers.matches; } get isDarkMode() { return this.mode === ModeToggle.DARK_MODE; } get isLightMode() { return this.mode === ModeToggle.LIGHT_MODE; } get hasMode() { return this.mode != null; } get mode() { return sessionStorage.getItem(ModeToggle.MODE_KEY); } /* get the current mode on screen */ get modeStatus() { if (this.isDarkMode || (!this.hasMode && this.isSysDarkPrefer)) { return ModeToggle.DARK_MODE; } else { return ModeToggle.LIGHT_MODE; } } setDark() { $('html').attr(ModeToggle.MODE_ATTR, ModeToggle.DARK_MODE); sessionStorage.setItem(ModeToggle.MODE_KEY, ModeToggle.DARK_MODE); } setLight() { $('html').attr(ModeToggle.MODE_ATTR, ModeToggle.LIGHT_MODE); sessionStorage.setItem(ModeToggle.MODE_KEY, ModeToggle.LIGHT_MODE); } clearMode() { $('html').removeAttr(ModeToggle.MODE_ATTR); sessionStorage.removeItem(ModeToggle.MODE_KEY); } /* Notify another plugins that the theme mode has changed */ notify() { window.postMessage({ direction: ModeToggle.ID, message: this.modeStatus }, "*"); } flipMode() { if (this.hasMode) { if (this.isSysDarkPrefer) { if (this.isLightMode) { this.clearMode(); } else { this.setLight(); } } else { if (this.isDarkMode) { this.clearMode(); } else { this.setDark(); } } } else { if (this.isSysDarkPrefer) { this.setLight(); } else { this.setDark(); } } this.notify(); } /* flipMode() */ } /* ModeToggle */ const modeToggle = new ModeToggle(); </script><body data-topbar-visible="true"><div id="sidebar" class="d-flex flex-column align-items-end"><div class="profile-wrapper text-center"><div id="avatar"> <a href="/blog/" class="mx-auto"> </a></div><div class="site-title"> <a href="/blog/">Unf0rG1v3n</a></div><div class="site-subtitle font-italic">Security engineer</div></div><ul class="w-100"><li class="nav-item"> <a href="/blog/" class="nav-link"> <i class="fa-fw fas fa-home ml-xl-3 mr-xl-3 unloaded"></i> <span>HOME</span> </a><li class="nav-item"> <a href="/blog/categories/" class="nav-link"> <i class="fa-fw fas fa-stream ml-xl-3 mr-xl-3 unloaded"></i> <span>CATEGORIES</span> </a><li class="nav-item"> <a href="/blog/tags/" class="nav-link"> <i class="fa-fw fas fa-tag ml-xl-3 mr-xl-3 unloaded"></i> <span>TAGS</span> </a><li class="nav-item"> <a href="/blog/archives/" class="nav-link"> <i class="fa-fw fas fa-archive ml-xl-3 mr-xl-3 unloaded"></i> <span>ARCHIVES</span> </a><li class="nav-item"> <a href="/blog/about/" class="nav-link"> <i class="fa-fw fas fa-info-circle ml-xl-3 mr-xl-3 unloaded"></i> <span>ABOUT</span> </a></ul><div class="sidebar-bottom mt-auto d-flex flex-wrap justify-content-center align-items-center"> <button class="mode-toggle btn" aria-label="Switch Mode"> <i class="fas fa-adjust"></i> </button> <span class="icon-border"></span> <a href="https://github.com/jean0828" aria-label="github" target="_blank" rel="noopener noreferrer"> <i class="fab fa-github"></i> </a> <a href="https://twitter.com/" aria-label="twitter" target="_blank" rel="noopener noreferrer"> <i class="fab fa-twitter"></i> </a> <a href="javascript:location.href = 'mailto:' + ['jean.santamaria93','gmail.com'].join('@')" aria-label="email" > <i class="fas fa-envelope"></i> </a> <a href="/blog/feed.xml" aria-label="rss" > <i class="fas fa-rss"></i> </a></div></div><div id="topbar-wrapper"><div id="topbar" class="container d-flex align-items-center justify-content-between h-100 pl-3 pr-3 pl-md-4 pr-md-4"> <span id="breadcrumb"> <span> <a href="/blog/"> Home </a> </span> <span>Adding the Docker Build and Publish Stage in a Pipeline</span> </span> <i id="sidebar-trigger" class="fas fa-bars fa-fw"></i><div id="topbar-title"> Post</div><i id="search-trigger" class="fas fa-search fa-fw"></i> <span id="search-wrapper" class="align-items-center"> <i class="fas fa-search fa-fw"></i> <input class="form-control" id="search-input" type="search" aria-label="search" autocomplete="off" placeholder="Search..."> </span> <span id="search-cancel" >Cancel</span></div></div><div id="main-wrapper" class="d-flex justify-content-center"><div id="main" class="container pl-xl-4 pr-xl-4"><div class="row"><div id="core-wrapper" class="col-12 col-lg-11 col-xl-9 pr-xl-4"><div class="post pl-1 pr-1 pl-md-2 pr-md-2"><h1 data-toc-skip>Adding the Docker Build and Publish Stage in a Pipeline</h1><div class="post-meta text-muted"> <span> Posted <em class="" data-ts="1680661200" data-df="ll" data-toggle="tooltip" data-placement="bottom"> Apr 5, 2023 </em> </span><div class="d-flex justify-content-between"> <span> By <em> <a href="https://github.com/jean0828">Jean Pierre</a> </em> </span><div> <span class="readtime" data-toggle="tooltip" data-placement="bottom" title="1113 words"> <em>6 min</em> read</span></div></div></div><div class="post-content"><p>This is part from the course of Linux Foundation called Implementing DevSecOps and it’s given by <a href="https://gist.github.com/initcron">initcron</a>.</p><p>In a development environment, you can build an image with Docker. However, in a Continuous Integration environment such as Jenkins, it’s not prudent to use Docker daemon, as it would need privileged access. You can however use tools such as <strong>Kaniko</strong> to build an image in a secure, non-privileged environment. Follow the steps in this section to achieve that.</p><p>The step-by-step process to set up an automated container image build and publish process involves the following:</p><ol><li>Setting up the credentials to connect to the container registry. Kaniko will read these credentials while being launched as part of a pipeline run by Jenkins.<li>Adding a build agent configuration so that Jenkins knows which container image to use and how to launch a container/pod to run the job with Kaniko.<li>Adding a stage to the Jenkins pipeline to launch Kaniko to build an image using Dockerfile in the source repository and publish it to the registry.</ol><h2 id="adding-the-registry-credentials"><span class="mr-2">Adding the Registry Credentials</span><a href="#adding-the-registry-credentials" class="anchor text-muted"><i class="fas fa-hashtag"></i></a></h2><p>Kaniko is able to read the credentials store as Kubernetes secrets. Using Docker Hub as the container registry, we can create a secret with the registry credentials:</p><div class="language-plaintext highlighter-rouge"><div class="code-header"> <span data-label-text="Plaintext"><i class="fas fa-code small"></i></span> <button aria-label="copy" data-title-succeed="Copied!"><i class="far fa-clipboard"></i></button></div><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+</pre><td class="rouge-code"><pre>kubectl create secret -n ci docker-registry regcred --docker-server=https://index.docker.io/v1/ --docker-username=user --docker-password=pass --docker-email=user@email.org
+</pre></table></code></div></div><p><a href="https://i.imgur.com/dZ9Ksvl.png" class="popup img-link "><img data-src="https://i.imgur.com/dZ9Ksvl.png" alt="secretdocker" class="lazyload" data-proofer-ignore></a></p><p>We can check the secret was added with the command</p><div class="language-plaintext highlighter-rouge"><div class="code-header"> <span data-label-text="Plaintext"><i class="fas fa-code small"></i></span> <button aria-label="copy" data-title-succeed="Copied!"><i class="far fa-clipboard"></i></button></div><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+</pre><td class="rouge-code"><pre>kubectl get secrets -n ci
+</pre></table></code></div></div><h2 id="create-the-jenkins-agent-configuration"><span class="mr-2">Create the Jenkins Agent Configuration</span><a href="#create-the-jenkins-agent-configuration" class="anchor text-muted"><i class="fas fa-hashtag"></i></a></h2><p>Add the build-agent configuration that Jenkins will use to create a container and run the image build job with it. This configuration uses Kaniko, which is an image build tool sitting inside Kubernetes and creates an image without requiring a Docker daemon. This is a secure alternative to using DIND, which is a privileged container, or mounting a Docker socket directly on the Jenkins host.</p><p>we should edit the <strong>build-agent.yml</strong> file which is part of the project to add the Kaniko agent configuration, as in:</p><div class="language-plaintext highlighter-rouge"><div class="code-header"> <span data-label-text="Plaintext"><i class="fas fa-code small"></i></span> <button aria-label="copy" data-title-succeed="Copied!"><i class="far fa-clipboard"></i></button></div><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+61
+62
+63
+</pre><td class="rouge-code"><pre>apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    app: spring-build-ci
+spec:
+  containers:
+    - name: maven
+      image: maven:alpine
+      command:
+        - cat
+      tty: true
+      volumeMounts:
+        - name: m2
+          mountPath: /root/.m2/
+    - name: docker-tools
+      image: rmkanda/docker-tools:latest
+      command:
+        - cat
+      tty: true
+      volumeMounts:
+        - mountPath: /var/run
+          name: docker-sock
+        - mountPath: /tmp/trivycache/
+          name: trivycache
+    - name: kaniko
+	  image: gcr.io/kaniko-project/executor:v1.6.0-debug
+	  imagePullPolicy: Always
+	  command: 
+	   - sleep
+	   args:
+	    - 99d
+	   volumeMounts:
+	    - name: jenkins-docker-cfg
+	      mountPath: /kaniko/.docker
+    - name: trufflehog
+      image: rmkanda/trufflehog
+      command:
+        - cat
+      tty: true
+    - name: licensefinder
+      image: licensefinder/license_finder
+      command:
+        - cat
+      tty: true
+  volumes:
+    - name: m2
+      hostPath:
+        path: /tmp/.m2/
+    - name: docker-sock
+      hostPath:
+        path: /var/run
+    - name: trivycache
+      hostPath:
+        path: /tmp/trivycache/
+	- name: jenkins-docker-cfg
+	  projected:
+	   sources:
+	   - secret: 
+	       name: regcred
+		   items:
+		     - key: .dockerconfigjson
+		       path: config.json
+</pre></table></code></div></div><p>Also, we should add the stage to Jenkinsfile to build an image with Kaniko. When launched, this stage will use the registry credentials set up earlier, read the Dockerfile which is available as part of the source code repo, build an image and publish it to the registry.</p><div class="language-plaintext highlighter-rouge"><div class="code-header"> <span data-label-text="Plaintext"><i class="fas fa-code small"></i></span> <button aria-label="copy" data-title-succeed="Copied!"><i class="far fa-clipboard"></i></button></div><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+</pre><td class="rouge-code"><pre>stage('Docker BnP') {
+	steps {
+		container('kaniko') {
+		 sh '/kaniko/executor -f `pwd`/Dockerfile -c `pwd` --insecure --skip-tls-verify --cache=true --destination=docker.io/xxxxxx/dsodemo'
+		 } 
+	} 
+}
+</pre></table></code></div></div><p>In my case, the Jenkinsfile is:</p><div class="language-plaintext highlighter-rouge"><div class="code-header"> <span data-label-text="Plaintext"><i class="fas fa-code small"></i></span> <button aria-label="copy" data-title-succeed="Copied!"><i class="far fa-clipboard"></i></button></div><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+61
+62
+63
+64
+65
+66
+67
+68
+69
+70
+71
+72
+73
+74
+75
+76
+77
+78
+79
+80
+81
+82
+83
+84
+85
+86
+87
+88
+89
+90
+91
+92
+93
+94
+95
+96
+97
+98
+99
+100
+101
+102
+103
+104
+105
+106
+107
+108
+109
+110
+111
+112
+113
+114
+115
+</pre><td class="rouge-code"><pre>pipeline {
+
+  agent {
+
+    kubernetes {
+
+      yamlFile 'build-agent.yaml'
+
+      defaultContainer 'maven'
+
+      idleMinutes 1
+
+    }
+
+  }
+
+  stages {
+
+    stage('Build') {
+
+      parallel {
+
+        stage('Compile') {
+
+          steps {
+
+            container('maven') {
+
+              sh 'mvn compile'
+
+            }
+
+          }
+
+        }
+
+      }
+
+    }
+
+    stage('Test') {
+
+      parallel {
+
+        stage('Unit Tests') {
+
+          steps {
+
+            container('maven') {
+
+              sh 'mvn test'
+
+            }
+
+          }
+
+        }
+
+      }
+
+    }
+
+    stage('Package') {
+
+      parallel {
+
+        stage('Create Jarfile') {
+
+          steps {
+
+            container('maven') {
+
+              sh 'mvn package -DskipTests'
+
+            }
+
+          }
+
+        }
+
+        stage('Docker BnP') {
+
+          steps {
+
+            container('kaniko') {
+
+              sh '/kaniko/executor -- force -f `pwd`/Dockerfile -c `pwd` --insecure --skip-tls-verify --cache=true --destination=docker.io/jean0828/dsodemo'
+
+            }
+
+          }
+
+        }
+
+      }
+
+    }
+
+  
+
+    stage('Deploy to Dev') {
+
+      steps {
+
+        // TODO
+
+        sh "echo done"
+
+      }
+
+    }
+
+  }
+
+}
+</pre></table></code></div></div><p>The project is located <a href="https://github.com/jean0828/dso-demo-lab2">here</a>. The pipeline will be execute when there is a new commit or when you add the pipeline as described in the <a href="https://jean0828.github.io/blog/posts/Deploying-a-Cloud-Environment-for-DevSecops/">first part</a>. Then, when it’s completed, we obtain the following image:</p><p><a href="https://i.imgur.com/ym9tfES.png" class="popup img-link "><img data-src="https://i.imgur.com/ym9tfES.png" alt="pipeline-completed" class="lazyload" data-proofer-ignore></a></p><p>As we can see, a new step was added to the Package stage and it’s the step to build and publish the image in Docker Hub. Besides, we can confirm that was executed without problems because we can see the image in Docker Hub:</p><p><a href="https://i.imgur.com/9O8HeuD.png" class="popup img-link "><img data-src="https://i.imgur.com/9O8HeuD.png" alt="dockerhub" class="lazyload" data-proofer-ignore></a></p><p>Now, with simple steps we have a continuos integration pipeline.</p></div><div class="post-tail-wrapper text-muted"><div class="post-meta mb-3"> <i class="far fa-folder-open fa-fw mr-1"></i> <a href='/blog/categories/devsecops/'>devsecops</a></div><div class="post-tags"> <i class="fa fa-tags fa-fw mr-1"></i> <a href="/blog/tags/kubernetes/" class="post-tag no-text-decoration" >kubernetes</a> <a href="/blog/tags/google-cloud/" class="post-tag no-text-decoration" >google cloud</a> <a href="/blog/tags/devsecops/" class="post-tag no-text-decoration" >devsecops</a> <a href="/blog/tags/jenkins/" class="post-tag no-text-decoration" >jenkins</a> <a href="/blog/tags/docker/" class="post-tag no-text-decoration" >docker</a></div><div class="post-tail-bottom d-flex justify-content-between align-items-center mt-3 pt-5 pb-2"><div class="license-wrapper"> This post is licensed under <a href="https://creativecommons.org/licenses/by/4.0/"> CC BY 4.0 </a> by the author.</div><div class="share-wrapper"> <span class="share-label text-muted mr-1">Share</span> <span class="share-icons"> <a href="https://twitter.com/intent/tweet?text=Adding%20the%20Docker%20Build%20and%20Publish%20Stage%20in%20a%20Pipeline%20-%20Unf0rG1v3n&url=https%3A%2F%2Fjean0828.github.io%2Fblog%2Fposts%2FAdding-the-Docker-Build-and-Publish-Stage-in-a-Pipeline%2F" data-toggle="tooltip" data-placement="top" title="Twitter" target="_blank" rel="noopener" aria-label="Twitter"> <i class="fa-fw fab fa-twitter"></i> </a> <a href="https://www.facebook.com/sharer/sharer.php?title=Adding%20the%20Docker%20Build%20and%20Publish%20Stage%20in%20a%20Pipeline%20-%20Unf0rG1v3n&u=https%3A%2F%2Fjean0828.github.io%2Fblog%2Fposts%2FAdding-the-Docker-Build-and-Publish-Stage-in-a-Pipeline%2F" data-toggle="tooltip" data-placement="top" title="Facebook" target="_blank" rel="noopener" aria-label="Facebook"> <i class="fa-fw fab fa-facebook-square"></i> </a> <a href="https://t.me/share/url?url=https%3A%2F%2Fjean0828.github.io%2Fblog%2Fposts%2FAdding-the-Docker-Build-and-Publish-Stage-in-a-Pipeline%2F&text=Adding%20the%20Docker%20Build%20and%20Publish%20Stage%20in%20a%20Pipeline%20-%20Unf0rG1v3n" data-toggle="tooltip" data-placement="top" title="Telegram" target="_blank" rel="noopener" aria-label="Telegram"> <i class="fa-fw fab fa-telegram"></i> </a> <i id="copy-link" class="fa-fw fas fa-link small" data-toggle="tooltip" data-placement="top" title="Copy link" data-title-succeed="Link copied successfully!"> </i> </span></div></div></div></div></div><div id="panel-wrapper" class="col-xl-3 pl-2 text-muted"><div class="access"><div id="access-lastmod" class="post"><div class="panel-heading">Recently Updated</div><ul class="post-content pl-0 pb-1 ml-1 mt-2"><li><a href="/blog/posts/LDAP-Monitoring-with-AMA-and-Microsoft-Sentinel/">LDAP Monitoring with AMA and Microsoft Sentinel</a><li><a href="/blog/posts/Deploying-a-Cloud-Environment-for-DevSecops/">Deploying a Cloud Environment for DevSecops</a><li><a href="/blog/posts/Analyzing-Packets-with-Wireshark-and-Python/">Analyzing Packets with Wireshark and Python</a><li><a href="/blog/posts/Administracion-de-cuentas-locales-en-el-Directorio-Activo-con-LAPS/">(ESP) Administracion de cuentas locales en el Directorio Activo con LAPS</a><li><a href="/blog/posts/Monitoring-Powershell-commands-with-Elastic-Stack/">Monitoring Powershell commands with Elastic Stack</a></ul></div><div id="access-tags"><div class="panel-heading">Trending Tags</div><div class="d-flex flex-wrap mt-3 mb-1 mr-3"> <a class="post-tag" href="/blog/tags/sentinel/">sentinel</a> <a class="post-tag" href="/blog/tags/siem/">siem</a> <a class="post-tag" href="/blog/tags/active-directory/">active directory</a> <a class="post-tag" href="/blog/tags/windows/">windows</a> <a class="post-tag" href="/blog/tags/azure/">azure</a> <a class="post-tag" href="/blog/tags/devsecops/">devsecops</a> <a class="post-tag" href="/blog/tags/elastic/">elastic</a> <a class="post-tag" href="/blog/tags/google-cloud/">google cloud</a> <a class="post-tag" href="/blog/tags/jenkins/">jenkins</a> <a class="post-tag" href="/blog/tags/kubernetes/">kubernetes</a></div></div></div><div id="toc-wrapper" class="pl-0 pr-4 mb-5"><div class="panel-heading pl-3 pt-2 mb-2">Contents</div><nav id="toc"></nav></div><script src="https://cdn.jsdelivr.net/npm/tocbot@4.20.1/dist/tocbot.min.js"></script></div></div><div class="row"><div id="tail-wrapper" class="col-12 col-lg-11 col-xl-9 pl-3 pr-3 pr-xl-4 mt-5"><div id="related-posts" class="mb-2 mb-sm-4"><h3 class="pt-2 mb-4 ml-1" data-toc-skip>Further Reading</h3><div class="card-deck mb-4"><div class="card"> <a href="/blog/posts/Deploying-a-Cloud-Environment-for-DevSecops/"><div class="card-body"> <em class="small" data-ts="1677554400" data-df="ll" > Feb 28, 2023 </em><h3 class="pt-0 mt-1 mb-3" data-toc-skip>Deploying a Cloud Environment for DevSecops</h3><div class="text-muted small"><p> For this case, we are going to use Google Cloud. There, a Kubernetes cluster will be created, Linux environment for development will be also created, and Jenkins will be deployed within Kubernetes....</p></div></div></a></div><div class="card"> <a href="/blog/posts/LDAP-Monitoring-with-AMA-and-Microsoft-Sentinel/"><div class="card-body"> <em class="small" data-ts="1692795600" data-df="ll" > Aug 23, 2023 </em><h3 class="pt-0 mt-1 mb-3" data-toc-skip>LDAP Monitoring with AMA and Microsoft Sentinel</h3><div class="text-muted small"><p> According to Microsoft. LDAP is “an application protocol for working with various directory services. Directory services, such as Active Directory, store user and account information, and security ...</p></div></div></a></div><div class="card"> <a href="/blog/posts/Analyzing-Packets-with-Wireshark-and-Python/"><div class="card-body"> <em class="small" data-ts="1664076000" data-df="ll" > Sep 25, 2022 </em><h3 class="pt-0 mt-1 mb-3" data-toc-skip>Analyzing Packets with Wireshark and Python</h3><div class="text-muted small"><p> Some cases, as a analysts we need to review network packets to find the root cause of an error or incident. for this reason, in this post we’re going to analyze packets using wireshark and see if w...</p></div></div></a></div></div></div><div class="post-navigation d-flex justify-content-between"> <a href="/blog/posts/Deploying-a-Cloud-Environment-for-DevSecops/" class="btn btn-outline-primary" prompt="Older"><p>Deploying a Cloud Environment for DevSecops</p></a> <a href="/blog/posts/LDAP-Monitoring-with-AMA-and-Microsoft-Sentinel/" class="btn btn-outline-primary" prompt="Newer"><p>LDAP Monitoring with AMA and Microsoft Sentinel</p></a></div></div></div></div><div id="search-result-wrapper" class="d-flex justify-content-center unloaded"><div class="col-12 col-sm-11 post-content"><div id="search-hints"><div id="access-tags"><div class="panel-heading">Trending Tags</div><div class="d-flex flex-wrap mt-3 mb-1 mr-3"> <a class="post-tag" href="/blog/tags/sentinel/">sentinel</a> <a class="post-tag" href="/blog/tags/siem/">siem</a> <a class="post-tag" href="/blog/tags/active-directory/">active directory</a> <a class="post-tag" href="/blog/tags/windows/">windows</a> <a class="post-tag" href="/blog/tags/azure/">azure</a> <a class="post-tag" href="/blog/tags/devsecops/">devsecops</a> <a class="post-tag" href="/blog/tags/elastic/">elastic</a> <a class="post-tag" href="/blog/tags/google-cloud/">google cloud</a> <a class="post-tag" href="/blog/tags/jenkins/">jenkins</a> <a class="post-tag" href="/blog/tags/kubernetes/">kubernetes</a></div></div></div><div id="search-results" class="d-flex flex-wrap justify-content-center text-muted mt-3"></div></div></div></div><footer><div class="container pl-lg-4 pr-lg-4"><div class="d-flex justify-content-between align-items-center text-muted ml-md-3 mr-md-3"><div class="footer-left"><p class="mb-0"> © 2023 <a href="https://github.com/jean0828">Jean Pierre</a>. <span data-toggle="tooltip" data-placement="top" title="Except where otherwise noted, the blog posts on this site are licensed under the Creative Commons Attribution 4.0 International (CC BY 4.0) License by the author.">Some rights reserved.</span></p></div><div class="footer-right"><p class="mb-0">Powered by <a href="https://jekyllrb.com" target="_blank" rel="noopener">Jekyll</a> with <a href="https://github.com/cotes2020/jekyll-theme-chirpy" target="_blank" rel="noopener">Chirpy</a> theme.</p></div></div></div></footer><div id="mask"></div><a id="back-to-top" href="#" aria-label="back-to-top" class="btn btn-lg btn-box-shadow" role="button"> <i class="fas fa-angle-up"></i> </a> <script src="https://cdn.jsdelivr.net/npm/simple-jekyll-search@1.10.0/dest/simple-jekyll-search.min.js"></script> <script> SimpleJekyllSearch({ searchInput: document.getElementById('search-input'), resultsContainer: document.getElementById('search-results'), json: '/blog/assets/js/data/search.json', searchResultTemplate: '<div class="pl-1 pr-1 pl-sm-2 pr-sm-2 pl-lg-4 pr-lg-4 pl-xl-0 pr-xl-0"> <a href="{url}">{title}</a><div class="post-meta d-flex flex-column flex-sm-row text-muted mt-1 mb-1"> {categories} {tags}</div><p>{snippet}</p></div>', noResultsText: '<p class="mt-5">Oops! No result founds.</p>', templateMiddleware: function(prop, value, template) { if (prop === 'categories') { if (value === '') { return `${value}`; } else { return `<div class="mr-sm-4"><i class="far fa-folder fa-fw"></i>${value}</div>`; } } if (prop === 'tags') { if (value === '') { return `${value}`; } else { return `<div><i class="fa fa-tag fa-fw"></i>${value}</div>`; } } } }); </script> <script src="https://cdn.jsdelivr.net/combine/npm/magnific-popup@1/dist/jquery.magnific-popup.min.js,npm/lazysizes@5.3.2/lazysizes.min.js,npm/clipboard@2/dist/clipboard.min.js"></script> <script src="https://cdn.jsdelivr.net/combine/npm/dayjs@1/dayjs.min.js,npm/dayjs@1/locale/en.min.js,npm/dayjs@1/plugin/relativeTime.min.js,npm/dayjs@1/plugin/localizedFormat.min.js"></script> <script defer src="/blog/assets/js/dist/post.min.js"></script> <script src="https://cdn.jsdelivr.net/npm/bootstrap@4/dist/js/bootstrap.bundle.min.js"></script> <script defer src="/blog/unregister.js"></script>
